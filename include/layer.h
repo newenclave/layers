@@ -134,12 +134,12 @@ namespace test01 {
 
 		bool has_upper() const
 		{
-			return upper_traits::is_empty(upper_);
+			return !upper_traits::is_empty(upper_);
 		}
 
 		bool has_lower() const
 		{
-			return lower_traits::is_empty(lower_);
+			return !lower_traits::is_empty(lower_);
 		}
 	private:
 		upper_pointer_type upper_ = nullptr;
