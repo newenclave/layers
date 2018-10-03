@@ -10,7 +10,7 @@ namespace test01 {
 			template <typename T>
 			static bool is_empty(pointer_type<T> ptr)
 			{
-				return ptr != nullptr;
+				return ptr == nullptr;
 			}
 
 			template <typename T>
@@ -38,7 +38,7 @@ namespace test01 {
 			template <typename T>
 			static bool is_empty(pointer_type<T> &ptr)
 			{
-				return ptr != nullptr;
+				return ptr == nullptr;
 			}
 
 			template <typename T>
