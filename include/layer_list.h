@@ -5,7 +5,11 @@
 namespace test01 {
 
 	template <typename MsgType>
-	class layer_list : public layer<MsgType, traits::raw_pointer> {
+	class layer_list : public layer<
+		MsgType, 
+		traits::raw_pointer,
+		traits::raw_pointer
+	> {
 	public:
 
 		using message_type = MsgType;
