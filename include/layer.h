@@ -84,18 +84,18 @@ namespace test01 {
 
 		layer() = default;
 
-		layer(layer<MsgType, upper_traits, lower_traits> &&other)
+		layer(this_type &&other)
 		{
 			swap(other);
 		}
 
-		layer& operator = (layer<MsgType, upper_traits, lower_traits> &&other)
+		layer& operator = (this_type &&other)
 		{
 			swap(other);
 			return *this;
 		}
 
-		void swap(layer<MsgType, upper_traits, lower_traits> &other)
+		void swap(this_type &other)
 		{
 			upper_traits::swap(upper_, other.upper_);
 			lower_traits::swap(lower_, other.lower_);
@@ -117,6 +117,7 @@ namespace test01 {
 		{
 			send_to_lower(std::move(msg));
 		}
+
 		virtual void from_lower(message_type msg) // from lower layer
 		{
 			send_to_upper(std::move(msg));

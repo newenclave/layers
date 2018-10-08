@@ -1,6 +1,6 @@
 #pragma once
 #include "layer.h"
-#include <deque>
+#include <list>
 
 namespace test01 {
 
@@ -15,6 +15,30 @@ namespace test01 {
 		using message_type = MsgType;
 		using layer_type = layer<MsgType>;
 		using layer_uptr = std::unique_ptr<layer_type>;
+		using iterator = typename std::list<layer_uptr>::iterator;
+		using const_iterator = typename std::list<layer_uptr>::const_iterator;
+
+		iterator begin()
+		{
+			return list_.begin();
+		}
+
+		iterator end()
+		{
+			return list_.end();
+		}
+
+		const_iterator cbegin() const
+		{
+			return list_.cbegin();
+		}
+
+		const_iterator cend() const
+		{
+			return list_.cend();
+		}
+
+	public:
 
 		void from_upper(message_type msg) override
 		{
@@ -71,7 +95,7 @@ namespace test01 {
 		}
 
 	private:
-		std::deque<layer_uptr> list_;
+		std::list<layer_uptr> list_;
 	};
 }
 
