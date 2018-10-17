@@ -76,59 +76,6 @@ namespace http_parser {
 		}
 	};
 
-	template <typename CharType>
-	struct caseless_char_traits : public std::char_traits<CharType> {
-		using value_type = CharType;
-		static value_type lower(value_type val)
-		{
-			return std::tolower(val);
-		}
-
-		static bool eq(value_type c1, value_type c2)
-		{
-			return lower(c1) == lower(c2);
-		}
-
-		static bool ne(value_type c1, value_type c2)
-		{
-			return lower(c1) != lower(c2);
-		}
-
-		static bool lt(value_type c1, value_type c2)
-		{
-			return lower(c1) < lower(c2);
-		}
-
-		static int compare(const value_type* s1, const value_type* s2, size_t n)
-		{
-			while (n-- != 0) {
-				value_type ls1 = lower(*s1++);
-				value_type ls2 = lower(*s2++);
-				if (ls1 < ls2) {
-					return -1;
-				}
-				if (ls1 > ls2) {
-					return 1;
-				}
-			}
-			return 0;
-		}
-
-		static const value_type* find(const value_type* s, int n, char a) {
-			while (n-- > 0 && lower(*s) != lower(a)) {
-				++s;
-			}
-			return s;
-		}
-	};
-	using caseless_string = std::basic_string<char, caseless_char_traits<char> >;
-
-	inline
-		std::ostream &operator << (std::ostream &out, const caseless_string &val)
-	{
-		return out << val.c_str();
-	}
-
 	class flow_collector {
 
 	public:
@@ -136,7 +83,7 @@ namespace http_parser {
 		using parser_call = std::function<bool()>;
 		using container_type = std::deque<char>;
 		using tokenizer = header_tokenizer<container_type::const_iterator>;
-		using header_map = std::multimap<caseless_string, std::string>;
+		using header_map = std::multimap<std::string, std::string>;
 
 		flow_collector()
 		{
@@ -266,6 +213,17 @@ namespace http_parser {
 			current_parser_ = [this]() { return body_process_impl(); };
 			return true;
 		}
+
+		template <typename Itr>
+		std::string tolower(Itr begin, Itr end)
+		{
+			std::string data(begin, end);
+			for (auto &c : data) {
+				c = std::tolower(c);
+			}
+			return data;
+		}
+
 		std::size_t expected_length_ = 0;
 
 	private:
@@ -307,7 +265,7 @@ namespace http_parser {
 				--b;
 			}
 
-			caseless_string fld_name(key.first, key.second);
+			std::string fld_name = tolower(key.first, key.second);
 			std::string value(next, b);
 			if (fld_name == "content-length") {
 				try {
