@@ -185,6 +185,8 @@ namespace http_parser {
 			return headers_.count(name.c_str()) > 0;
 		}
 
+	protected:
+
 		bool reduce_data()
 		{
 			if (data().size() < expected_length_) {
@@ -198,8 +200,6 @@ namespace http_parser {
 			}
 			return !data().empty();
 		}
-
-	protected:
 
 		bool body_process_impl()
 		{
@@ -265,9 +265,9 @@ namespace http_parser {
 				--b;
 			}
 
-			std::string fld_name = tolower(key.first, key.second);
+			std::string fld_name(key.first, key.second);
 			std::string value(next, b);
-			if (fld_name == "content-length") {
+			if (tolower(key.first, key.second) == "content-length") {
 				try {
 					expected_length_ = std::stoul(value);
 				} catch (...) {
@@ -351,65 +351,74 @@ namespace http_parser {
 				std::move(val.second.value)));
 		}
 
-		virtual std::string str() const
-		{
-			return str_headers();
-		}
-
-		std::string str_headers() const
+		std::string str() const
 		{
 			std::ostringstream oss;
+			for (auto &inf : info_) {
+				oss << inf;
+			}
+			oss << eol_value();
 			for (auto &hdr : headers_) {
 				oss << hdr.first << ": " << hdr.second << eol_value();
 			}
 			oss << eol_value();
 			return oss.str();
 		}
+
+		std::vector<std::string> &info()
+		{
+			return info_;
+		}
+
+		const std::vector<std::string> &info() const
+		{
+			return info_;
+		}
+
+		std::multimap<std::string, std::string> &headers()
+		{
+			return headers_;
+		}
+
+		const std::multimap<std::string, std::string> &headers() const
+		{
+			return headers_;
+		}
+
 	protected:
+
+		void set_info(std::vector<std::string> info)
+		{
+			info_ = std::move(info);
+		}
+
 		static const char *eol_value()
 		{
 			static const char values[3] = { '\r', '\n', '\0' };
 			return values;
 		}
 	private:
-		std::map<std::string, std::string> headers_;
+		std::vector<std::string> info_;
+		std::multimap<std::string, std::string> headers_;
 	};
 
 	class request : public header {
 	public:
 		request(std::string method, std::string path)
-			:method_(std::move(method))
-			, path_(std::move(path))
-		{}
-
-		std::string str() const override
 		{
-			std::ostringstream oss;
-			oss << method_ << " " << path_ << " " << "HTTP/1.1" << eol_value();
-			return oss.str() + str_headers();
+			set_info({ std::move(method), std::move(path), "HTTP/1.1" });
 		}
-
-	private:
-		std::string method_;
-		std::string path_;
 	};
 
 	class response : public header {
 	public:
-
-		response(int code)
-		{}
-
-		response() = default;
-
-		std::string str() const override
+		response()
 		{
-			std::ostringstream oss;
-			oss << "HTTP/1.1" << code_ << " " << "Code " << code_ << eol_value();
-			return oss.str() + str_headers();
+			set_info({ "HTTP/1.1", "200", "Ok" });
 		}
-
-	private:
-		int code_ = 200;
+		response(int code)
+		{
+			set_info({ "HTTP/1.1", to_string(code).value, "Some code" });
+		}
 	};
 }
