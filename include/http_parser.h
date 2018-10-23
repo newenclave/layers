@@ -351,6 +351,12 @@ namespace http_parser {
 				std::move(val.second.value)));
 		}
 
+		void add(std::string name, to_string value)
+		{
+			headers_.insert(std::make_pair(std::move(name), 
+				std::move(value.value)));
+		}
+
 		std::string str() const
 		{
 			std::ostringstream oss;
