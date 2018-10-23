@@ -333,7 +333,7 @@ namespace http_parser {
 		};
 
 	public:
-
+		using header_map = std::multimap<std::string, std::string>;
 		virtual ~header() = default;
 		header() = default;
 
@@ -375,12 +375,12 @@ namespace http_parser {
 			return info_;
 		}
 
-		std::multimap<std::string, std::string> &headers()
+		header_map &headers()
 		{
 			return headers_;
 		}
 
-		const std::multimap<std::string, std::string> &headers() const
+		const header_map &headers() const
 		{
 			return headers_;
 		}
@@ -399,7 +399,7 @@ namespace http_parser {
 		}
 	private:
 		std::vector<std::string> info_;
-		std::multimap<std::string, std::string> headers_;
+		header_map headers_;
 	};
 
 	class request : public header {

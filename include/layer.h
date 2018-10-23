@@ -124,10 +124,12 @@ namespace test01 {
 		}
 
 	protected:
+		
 		void send_to_lower(message_type msg)
 		{
 			lower_traits::get_write(lower_)->from_upper(std::move(msg));
 		}
+
 		void send_to_upper(message_type msg)
 		{
 			upper_traits::get_write(upper_)->from_lower(std::move(msg));
