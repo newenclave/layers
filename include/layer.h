@@ -113,15 +113,9 @@ namespace test01 {
 
 	public:
 
-		virtual void from_upper(message_type msg) // from upper layer
-		{
-			send_to_lower(std::move(msg));
-		}
+		virtual void from_upper(message_type msg) = 0;// from upper layer
 
-		virtual void from_lower(message_type msg) // from lower layer
-		{
-			send_to_upper(std::move(msg));
-		}
+		virtual void from_lower(message_type msg) = 0;// from lower layer
 
 	protected:
 		
@@ -147,5 +141,33 @@ namespace test01 {
 	private:
 		upper_pointer_type upper_ = nullptr;
 		lower_pointer_type lower_ = nullptr;
+	};
+
+	template <typename MsgType, 
+		typename UpperPtrTrait = traits::raw_pointer,
+		typename LowerPtrTrait = UpperPtrTrait
+	>
+	class pass_through_layer: public layer<MsgType, UpperPtrTrait, LowerPtrTrait> {
+
+		using upper_traits = UpperPtrTrait;
+		using lower_traits = LowerPtrTrait;
+		using this_type = pass_through_layer<MsgType, upper_traits, lower_traits>;
+		using super_type = layer<MsgType, upper_traits, lower_traits>;
+
+	public:
+		using message_type = super_type::message_type;
+		using upper_pointer_type = super_type::upper_pointer_type;
+		using lower_pointer_type = super_type::lower_pointer_type;
+
+	private:
+		void from_upper(message_type msg) override // from upper layer
+		{
+			this->send_to_lower(std::move(msg));
+		}
+
+		void from_lower(message_type msg) override // from lower layer
+		{
+			this->send_to_upper(std::move(msg));
+		}
 	};
 }
